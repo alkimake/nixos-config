@@ -23,7 +23,9 @@
     onActivation.cleanup = "zap";
   };
 
-
+  fonts.packages = [
+    (pkgs.nerdfonts.override {fonts = ["JetBrainsMono"];})
+  ];
 
   system.activationScripts.applications.text = let
     env = pkgs.buildEnv {
