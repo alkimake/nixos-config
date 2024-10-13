@@ -1,6 +1,9 @@
-{ inputs, config, pkgs, ... }:
-
 {
+  inputs,
+  config,
+  pkgs,
+  ...
+}: {
   # nixpkgs.overlays = import ../../lib/overlays.nix ++ [
   #   (import ./vim.nix { inherit inputs; })
   # ];
@@ -14,7 +17,7 @@
 
   homebrew = {
     enable = true;
-    casks  = [
+    casks = [
       "spotify"
     ];
     onActivation.cleanup = "zap";
