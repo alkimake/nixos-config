@@ -34,5 +34,8 @@
     common = {
       nix.enable = true;
     };
+    darwin = {
+      homebrew.enable = true;
+    };
   };
 }

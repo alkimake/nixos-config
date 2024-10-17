@@ -1,11 +1,13 @@
 {
   config,
   lib,
-  inputs,
+  darwin,
+  myLib,
   ...
-}: let
+}:
+ let
+  # darwin = true;
   cfg = config.myNixos;
-  myLib = (import ../../lib/myLib.nix) {inherit inputs;};
 
   commonModules =
     myLib.extendModules
@@ -21,19 +23,20 @@
 
   #
   # Taking all modules in ./features and adding enables to them
-  # features =
-  #   myLib.extendModules
-  #   (name: {
-  #     extraOptions = {
-  #       myNixos.${name}.enable = lib.mkEnableOption "enable my ${name} configuration";
-  #     };
-  #
-  #     configExtension = config: (lib.mkIf cfg.${name}.enable config);
-  #   })
-  #   (myLib.filesIn ./features)
-  #   {};
-  #
+  darwinModules =
+    myLib.extendModules
+    (name: {
+      extraOptions = {
+        myNixos.darwin.${name}.enable = lib.mkEnableOption "enable my ${name} configuration";
+      };
+
+      configExtension = config: (lib.mkIf cfg.darwin.${name}.enable config);
+    })
+    (myLib.filesIn ./darwin)
+    {};
+
 in {
   imports =
-    commonModules;
+    commonModules
+    ++(if darwin then darwinModules else []);
 }

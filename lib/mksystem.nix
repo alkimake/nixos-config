@@ -13,6 +13,7 @@
   outputs = inputs.self.outputs;
   # True if this is a WSL system.
   isWSL = wsl;
+  myLib = (import ./myLib.nix) {inherit inputs;};
 
   # The config files for this system.
   machineConfig = ../machines/${name}.nix;
@@ -36,6 +37,9 @@
 in
   systemFunc rec {
     inherit system;
+    specialArgs = {
+      inherit inputs outputs myLib darwin isWSL;
+    };
 
     modules = [
       # Apply our overlays. Overlays are keyed by system type so we have
@@ -67,7 +71,6 @@ in
       }
       # outputs.homeManagerModules.default
       outputs.osModules.default
-
 
       # We expose some extra arguments so that our modules can parameterize
       # better based on these values.

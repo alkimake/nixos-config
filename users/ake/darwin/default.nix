@@ -15,14 +15,6 @@
     pkgs.mkalias
   ];
 
-  homebrew = {
-    enable = true;
-    casks = [
-      "spotify"
-    ];
-    onActivation.cleanup = "zap";
-  };
-
   fonts.packages = [
     (pkgs.nerdfonts.override {fonts = ["JetBrainsMono"];})
   ];
