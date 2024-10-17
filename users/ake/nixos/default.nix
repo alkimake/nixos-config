@@ -1,6 +1,11 @@
 { pkgs, inputs, ... }:
 
 {
+  myHomeManager = {
+    common = {
+      nix.enable = true;
+    };
+  };
   # https://github.com/nix-community/home-manager/pull/2408
   environment.pathsToLink = [ "/share/fish" ];
 

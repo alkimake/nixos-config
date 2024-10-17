@@ -66,5 +66,8 @@
       user   = "ake";
       darwin = true;
     };
+
+    homeManagerModules.default = ./apps/home;
+    # osDefaults.default = ./apps/os;
   };
 }

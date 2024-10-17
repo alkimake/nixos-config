@@ -3,7 +3,6 @@
 { config, lib, pkgs, ... }:
 
 let
-  sources = import ../../nix/sources.nix;
   isDarwin = pkgs.stdenv.isDarwin;
   isLinux = pkgs.stdenv.isLinux;
 
@@ -15,7 +14,7 @@ let
     cat "$1" | col -bx | bat --language man --style plain
   ''));
 in {
-    # You can update Home Manager without changing this value. See
+  # You can update Home Manager without changing this value. See
   # the Home Manager release notes for a list of state version
   # changes in each release.
   home.stateVersion = "24.05";

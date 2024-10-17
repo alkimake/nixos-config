@@ -6,24 +6,6 @@
   # to manage it for us. This tells nix-darwin to just use whatever is running.
   nix.useDaemon = true;
 
-  # Keep in async with vm-shared.nix. (todo: pull this out into a file)
-  nix = {
-    # We need to enable flakes
-    extraOptions = ''
-      experimental-features = nix-command flakes
-      keep-outputs = true
-      keep-derivations = true
-    '';
-
-    # public binary cache that I use for all my derivations. You can keep
-    # this, use your own, or toss it. Its typically safe to use a binary cache
-    # since the data inside is checksummed.
-    settings = {
-      substituters = ["https://ake-nixos-config.cachix.org"];
-      trusted-public-keys = ["ake-nixos-config.cachix.org-1:bjEbXJyLrL1HZZHBbO4QALnI5faYZppzkU4D2s0G8RQ="];
-    };
-  };
-
   # zsh is the default shell on Mac and we want to make sure that we're
   # configuring the rc correctly with nix-darwin paths.
   programs.zsh.enable = true;
