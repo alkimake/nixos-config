@@ -24,7 +24,7 @@
 
   #
   # Taking all modules in ./features and adding enables to them
-  darwinModules =
+  darwinModules = if darwin then
     myLib.extendModules
     (name: {
       extraOptions = {
@@ -34,9 +34,9 @@
       configExtension = config: (lib.mkIf cfg.darwin.${name}.enable config);
     })
     (myLib.filesIn ./darwin)
-    {};
+    {} else [];
 
-  nixosModules =
+  nixosModules = if !darwin && !isWSL then
     myLib.extendModules
     (name: {
       extraOptions = {
@@ -46,10 +46,10 @@
       configExtension = config: (lib.mkIf cfg.nixos.${name}.enable config);
     })
     (myLib.filesIn ./darwin)
-    {};
+    {} else [];
 in {
   imports =
     commonModules
-    ++(if darwin then darwinModules else [])
-    ++(if !darwin && !isWSL then nixosModules else []);
+    ++ darwinModules
+    ++ nixosModules;
 }
