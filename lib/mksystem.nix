@@ -65,7 +65,9 @@ in
           };
         };
       }
-      outputs.homeManagerModules.default
+      # outputs.homeManagerModules.default
+      outputs.osModules.default
+
 
       # We expose some extra arguments so that our modules can parameterize
       # better based on these values.

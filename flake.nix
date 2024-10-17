@@ -68,6 +68,6 @@
     };
 
     homeManagerModules.default = ./apps/home;
-    # osDefaults.default = ./apps/os;
+    osModules.default = ./apps/os;
   };
 }

@@ -30,4 +30,9 @@
   environment.systemPackages = with pkgs; [
     cachix
   ];
+  myNixos = {
+    common = {
+      nix.enable = true;
+    };
+  };
 }
