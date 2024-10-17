@@ -2,6 +2,7 @@
   config,
   lib,
   darwin,
+  isWSL,
   myLib,
   ...
 }:
@@ -35,8 +36,20 @@
     (myLib.filesIn ./darwin)
     {};
 
+  nixosModules =
+    myLib.extendModules
+    (name: {
+      extraOptions = {
+        myNixos.nixos.${name}.enable = lib.mkEnableOption "enable my ${name} configuration";
+      };
+
+      configExtension = config: (lib.mkIf cfg.nixos.${name}.enable config);
+    })
+    (myLib.filesIn ./darwin)
+    {};
 in {
   imports =
     commonModules
-    ++(if darwin then darwinModules else []);
+    ++(if darwin then darwinModules else [])
+    ++(if !darwin && !isWSL then nixosModules else []);
 }
