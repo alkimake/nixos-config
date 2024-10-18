@@ -1,4 +1,5 @@
-_: {
+{lib, config, ...}: let 
+in{
   nix = {
     # We need to enable flakes
     extraOptions = ''
@@ -13,6 +14,20 @@ _: {
     settings = {
       substituters = ["https://ake-nixos-config.cachix.org"];
       trusted-public-keys = ["ake-nixos-config.cachix.org-1:CiM0xLg1ECceA4PNgDbFCq4tK2xUKdh76cMG5m0y6A0="];
+    };
+  };
+  options.myNixos = {
+    userName = lib.mkOption {
+      default = "ake";
+      description = ''
+        username
+      '';
+    };
+    userNixosSettings = lib.mkOption {
+      default = {};
+      description = ''
+        NixOS user settings
+      '';
     };
   };
 }

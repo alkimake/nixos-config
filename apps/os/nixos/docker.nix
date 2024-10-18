@@ -3,12 +3,12 @@
   config,
   ...
 }: let
-  cfg = config.myNixOS;
+  cfg = config.myNixos;
 in {
   # Docker can also be run rootless
   virtualisation.docker = {
     enable = true;
   };
   # User permissions
-  users.users.${config.currentSystemUser}.extraGroups = ["docker"];
+  users.users.${cfg.userName}.extraGroups = ["docker"];
 }

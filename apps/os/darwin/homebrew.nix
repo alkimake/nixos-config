@@ -1,4 +1,6 @@
-_: {
+{config, ...}: let
+  cfg = config.myNixos;
+in{
   homebrew = {
     enable = true;
     casks = [
