@@ -12,7 +12,6 @@ in {
     common = {
       nix.enable = true;
     };
-    darwin = {};
     nixos = {
       docker.enable = true;
     };
