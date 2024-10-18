@@ -45,7 +45,7 @@
 
       configExtension = config: (lib.mkIf cfg.nixos.${name}.enable config);
     })
-    (myLib.filesIn ./darwin)
+    (myLib.filesIn ./nixos)
     {} else [];
 in {
   imports =
