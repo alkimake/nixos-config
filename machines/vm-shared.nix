@@ -1,14 +1,16 @@
-{ config, pkgs, lib, currentSystem, currentSystemName,... }:
-
-let
+{
+  pkgs,
+  lib,
+  currentSystemName,
+  ...
+}: let
   # Turn this to true to use gnome instead of i3. This is a bit
   # of a hack, I just flip it on as I need to develop gnome stuff
   # for now.
   linuxGnome = true;
 in {
-  # Be careful updating this.
-  boot.kernelPackages = pkgs.linuxPackages_latest;
   myNixos = {
+    # TODO: assign current system user {userName}
     common = {
       nix.enable = true;
     };
@@ -21,31 +23,38 @@ in {
     # Needed for k2pdfopt 2.53.
     "mupdf-1.17.0"
   ];
+  boot = {
+    # Be careful updating this.
+    kernelPackages = pkgs.linuxPackages_latest;
+    loader = {
+      # Use the systemd-boot EFI boot loader.
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
 
-  # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+      # VMware, Parallels both only support this being 0 otherwise you see
+      # "error switching console mode" on boot.
+      systemd-boot.consoleMode = "0";
+    };
+  };
 
-  # VMware, Parallels both only support this being 0 otherwise you see
-  # "error switching console mode" on boot.
-  boot.loader.systemd-boot.consoleMode = "0";
-
-  # Define your hostname.
-  networking.hostName = "dev";
+  networking = {
+    # Define your hostname.
+    hostName = "dev";
+    # The global useDHCP flag is deprecated, therefore explicitly set to false here.
+    # Per-interface useDHCP will be mandatory in the future, so this generated config
+    # replicates the default behaviour.
+    useDHCP = false;
+    # Disable the firewall since we're in a VM and we want to make it
+    # easy to visit stuff in here. We only use NAT networking anyways.
+    firewall.enable = false;
+  };
 
   # Set your time zone.
   time.timeZone = "Asia/Seoul";
 
-  # The global useDHCP flag is deprecated, therefore explicitly set to false here.
-  # Per-interface useDHCP will be mandatory in the future, so this generated config
-  # replicates the default behaviour.
-  networking.useDHCP = false;
-
   # Don't require password for sudo
   security.sudo.wheelNeedsPassword = false;
 
-  # Virtualization settings
-  virtualisation.docker.enable = true;
 
   # Select internationalisation properties.
   i18n = {
@@ -61,41 +70,53 @@ in {
   };
 
   # setup windowing environment
-  services.xserver = if linuxGnome then {
-    enable = true;
-    xkb.layout = "us";
-    desktopManager.gnome.enable = true;
-    displayManager.gdm.enable = true;
-  } else {
-    enable = true;
-    xkb.layout = "us";
-    dpi = 220;
+  services = {
+    xserver =
+      if linuxGnome
+      then {
+        enable = true;
+        xkb.layout = "us";
+        desktopManager.gnome.enable = true;
+        displayManager.gdm.enable = true;
+      }
+      else {
+        enable = true;
+        xkb.layout = "us";
+        dpi = 220;
 
-    desktopManager = {
-      xterm.enable = false;
-      wallpaper.mode = "fill";
+        desktopManager = {
+          xterm.enable = false;
+          wallpaper.mode = "fill";
+        };
+
+        displayManager = {
+          defaultSession = "none+i3";
+          lightdm.enable = true;
+
+          # AARCH64: For now, on Apple Silicon, we must manually set the
+          # display resolution. This is a known issue with VMware Fusion.
+          sessionCommands = ''
+            ${pkgs.xorg.xset}/bin/xset r rate 200 40
+          '';
+        };
+
+        windowManager = {
+          i3.enable = true;
+        };
+      };
+    # Enable the OpenSSH daemon.
+    openssh = {
+      enable = true;
+      settings = {
+        PasswordAuthentication = true;
+        PermitRootLogin = "no";
+      };
     };
-
-    displayManager = {
-      defaultSession = "none+i3";
-      lightdm.enable = true;
-
-      # AARCH64: For now, on Apple Silicon, we must manually set the
-      # display resolution. This is a known issue with VMware Fusion.
-      sessionCommands = ''
-        ${pkgs.xorg.xset}/bin/xset r rate 200 40
-      '';
-    };
-
-    windowManager = {
-      i3.enable = true;
-    };
+    # Enable tailscale. We manually authenticate when we want with
+    # "sudo tailscale up". If you don't use tailscale, you should comment
+    # out or delete all of this.
+    tailscale.enable = true;
   };
-
-  # Enable tailscale. We manually authenticate when we want with
-  # "sudo tailscale up". If you don't use tailscale, you should comment
-  # out or delete all of this.
-  services.tailscale.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.mutableUsers = false;
@@ -114,28 +135,30 @@ in {
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [
-    cachix
-    gnumake
-    killall
-    niv
-    rxvt_unicode
-    xclip
-    neovim
-    tmux
-    git
+  environment.systemPackages = with pkgs;
+    [
+      cachix
+      gnumake
+      killall
+      niv
+      rxvt_unicode
+      xclip
+      neovim
+      tmux
+      git
 
-    # For hypervisors that support auto-resizing, this script forces it.
-    # I've noticed not everyone listens to the udev events so this is a hack.
-    (writeShellScriptBin "xrandr-auto" ''
-      xrandr --output Virtual-1 --auto
-    '')
-  ] ++ lib.optionals (currentSystemName == "vm-aarch64") [
-    # This is needed for the vmware user tools clipboard to work.
-    # You can test if you don't need this by deleting this and seeing
-    # if the clipboard sill works.
-    gtkmm3
-  ];
+      # For hypervisors that support auto-resizing, this script forces it.
+      # I've noticed not everyone listens to the udev events so this is a hack.
+      (writeShellScriptBin "xrandr-auto" ''
+        xrandr --output Virtual-1 --auto
+      '')
+    ]
+    ++ lib.optionals (currentSystemName == "vm-aarch64") [
+      # This is needed for the vmware user tools clipboard to work.
+      # You can test if you don't need this by deleting this and seeing
+      # if the clipboard sill works.
+      gtkmm3
+    ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -144,15 +167,6 @@ in {
   #   enable = true;
   #   enableSSHSupport = true;
   # };
-
-  # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
-  services.openssh.settings.PasswordAuthentication = true;
-  services.openssh.settings.PermitRootLogin = "no";
-
-  # Disable the firewall since we're in a VM and we want to make it
-  # easy to visit stuff in here. We only use NAT networking anyways.
-  networking.firewall.enable = false;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
