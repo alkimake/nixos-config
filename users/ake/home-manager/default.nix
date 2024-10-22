@@ -1,10 +1,8 @@
-{ isWSL, inputs, ... }:
+{ isDarwin, isWSL, inputs, ... }:
 
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, outputs, ... }:
 
 let
-  isDarwin = pkgs.stdenv.isDarwin;
-  isLinux = pkgs.stdenv.isLinux;
 
   # For our MANPAGER env var
   # https://github.com/sharkdp/bat/issues/1145
@@ -13,7 +11,27 @@ let
     '' else ''
     cat "$1" | col -bx | bat --language man --style plain
   ''));
+
+  importsCommon = [
+    ../../../homeManagerModules/common/gnupg.nix
+  ];
+  importsDarwin = [
+    ../../../homeManagerModules/darwin
+  ];
+  importsNixos = [
+    ../../../homeManagerModules/nixos
+  ];
+  imports = importsCommon
+    ++ (lib.optionals isDarwin importsDarwin)
+    ++ (lib.optionals (!isDarwin && !isWSL) importsNixos); # ++ (if isDarwin then importsDarwin else importsNixos);
+
+  # imports = [
+  #   (import ../../../homeManagerModules { inherit config; })
+  # ];
+
 in {
+  inherit imports;
+  programs.home-manager.enable = true;
   # You can update Home Manager without changing this value. See
   # the Home Manager release notes for a list of state version
   # changes in each release.
@@ -42,7 +60,7 @@ in {
   ] ++ (lib.optionals isDarwin [
     # This is automatically setup on Linux
     pkgs.cachix
-  ]) ++ (lib.optionals (isLinux && !isWSL) [
+  ]) ++ (lib.optionals (!isDarwin && !isWSL) [
     # Linux dependencies
   ]);
 }

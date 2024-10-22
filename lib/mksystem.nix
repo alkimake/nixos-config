@@ -65,6 +65,7 @@ in
           useGlobalPkgs = true;
           useUserPackages = true;
           users.${user} = import userHMConfig {
+            isDarwin = darwin;
             inherit isWSL inputs;
           };
         };
