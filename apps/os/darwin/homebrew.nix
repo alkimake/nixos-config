@@ -1,5 +1,4 @@
-{config, ...}: let
-  cfg = config.myNixos;
+{...}: let
 in{
   homebrew = {
     enable = true;
