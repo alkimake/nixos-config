@@ -67,7 +67,6 @@
       darwin = true;
     };
 
-    homeManagerModules.default = ./apps/home;
-    osModules.default = ./apps/os;
+    osModules.default = ./nixosModules;
   };
 }
