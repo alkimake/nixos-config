@@ -1,0 +1,1 @@
+This repository was a testing purpose between darwin and nixos configurations. Getting the latest implementation for it please refer to ; [https://github.com/alkimake/nixconfig](https://github.com/alkimake/nixconfig)
